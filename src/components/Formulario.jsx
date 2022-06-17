@@ -1,8 +1,16 @@
 // Hooks
 import useSelectCoins from '../hooks/useSelectCoins';
+import { useEffect, useState } from 'react';
 
 // Dependencias
 import styled from '@emotion/styled'
+import { divisas } from '../data/divisas'
+
+const Seccion = styled.section`
+  border: solid 1px #b4b4b4;
+  padding: 20px;
+  border-radius: 10px;
+`;
 
 const InputSubmit = styled.input`
   font-family: 'Lato', sans-serif;
@@ -14,7 +22,7 @@ const InputSubmit = styled.input`
   font-weight: 700;
   text-transform: uppercase;
   font-size: 20px;
-  border-radius: 10px;
+  border-radius: 5px;
   cursor: pointer;
   &:hover{
     background-color: #4b49e6;
@@ -25,14 +33,43 @@ const InputSubmit = styled.input`
 
 const Formulario = () => {
 
-  const [ SelectCoins ] = useSelectCoins();
-  SelectCoins()
+  const [criptos, setCriptos] = useState([])
+
+  const [ divisa, SelectCoins ] = useSelectCoins('💵 | Elige tu Divisa', divisas);
+  const [ criptomoneda ,SelectCriptomoneda ] = useSelectCoins('🪙 | Elige tu Criptomoneda', criptos);
+  
+  useEffect(() => {
+    const consularAPI = async () => {
+      const url = "https://min-api.cryptocompare.com/data/top/mktcapfull?limit=10&tsym=USD"
+      const respuesta = await fetch(url)
+      const resultado = await respuesta.json()
+      
+      const arrayCriptos = resultado.Data.map( cripto => {
+
+        const objeto = {
+          id: cripto.CoinInfo.Name,
+          nombre: cripto.CoinInfo.FullName
+        }
+        return objeto
+      })
+      setCriptos(arrayCriptos)
+
+    }
+    consularAPI();
+  }, []);
+  
   return (
     <form>
-      <InputSubmit
-        type="submit"
-        value="Cotizar 🔍"
-      />
+      <Seccion>
+        <SelectCoins/>
+        <SelectCriptomoneda/>
+      
+
+        <InputSubmit
+          type="submit"
+          value="Cotizar 🔍"
+        />
+      </Seccion>  
     </form>
   )
 }
