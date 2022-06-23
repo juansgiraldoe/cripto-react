@@ -6,6 +6,9 @@ import { useEffect, useState } from 'react';
 import styled from '@emotion/styled'
 import { divisas } from '../data/divisas'
 
+// Components
+import Error from './Error';
+
 const Seccion = styled.section`
   border: solid 1px #b4b4b4;
   padding: 20px;
@@ -31,9 +34,10 @@ const InputSubmit = styled.input`
   }
 `;
 
-const Formulario = () => {
+const Formulario = ({setMonedas}) => {
 
   const [criptos, setCriptos] = useState([])
+  const [error, setError] = useState(false)
 
   const [ divisa, SelectCoins ] = useSelectCoins('💵 | Elige tu Divisa', divisas);
   const [ criptomoneda ,SelectCriptomoneda ] = useSelectCoins('🪙 | Elige tu Criptomoneda', criptos);
@@ -57,20 +61,38 @@ const Formulario = () => {
     }
     consularAPI();
   }, []);
+
+  const handleSubmit = e => {
+    e.preventDefault()
+    if ([divisa, criptomoneda].includes('')){
+      setError(true)
+      return
+    }
+    setError(false)
+    setMonedas({
+      divisa,
+      criptomoneda
+    })
+  }
   
   return (
-    <form>
-      <Seccion>
-        <SelectCoins/>
-        <SelectCriptomoneda/>
-      
+    <>
+      {error && <Error>Todos los campos son obligatorios</Error>}
+      <form
+        onSubmit={handleSubmit}
+      >
+        <Seccion>
+          <SelectCoins/>
+          <SelectCriptomoneda/>
+        
 
-        <InputSubmit
-          type="submit"
-          value="Cotizar 🔍"
-        />
-      </Seccion>  
-    </form>
+          <InputSubmit
+            type="submit"
+            value="Cotizar 🔍"
+          />
+        </Seccion>  
+      </form>
+    </>
   )
 }
 
